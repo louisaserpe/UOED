@@ -266,9 +266,10 @@ outpath = os.path.join(firstcasepath, 'outputs', 'comparisons')
 os.makedirs(outpath, exist_ok=True)
 ## Remove disallowed characters and clip filename to max length
 max_filename_length = 250
+
 savename = os.path.join(
     outpath,
-    (f"results-{','.join(cases.keys())}"
+    (f"results-{','.join(cases.keys())}-{args.subregion.split('/')[1] if args.subregion is not None else ''}"
      .replace(':','').replace('/','').replace(' ','').replace('\\n','').replace('\n','')
      [:max_filename_length-len('.pptx')]) + '.pptx'
 )
@@ -1062,6 +1063,13 @@ toplot = {
                 'columns':'cost_cat',
                 'values':'Electricity Price ($/MWh)',
                 'label':'Electricity Price ($/MWh)'
+            },
+            'Average Electricity Price': {
+                'data': dictin_scoe,
+                'colors':output_formatting['cost_cat_colors'].squeeze(),
+                'columns':'cost_cat',
+                'values':'Average cost ($/MWh)',
+                'label':'Average cost ($/MWh)'
             },
 
         }

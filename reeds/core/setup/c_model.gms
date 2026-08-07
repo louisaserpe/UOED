@@ -1004,8 +1004,7 @@ eq_build_requirement(pcat,st,t)
 * must equal the required amount
     required_investment(pcat,st,t)
 
-* plus prescribed capacity
-    + sum{r$r_st(r,st),noncumulative_prescriptions(pcat,r,t)}
+
 * add slack
     + REQ_SLACK_RHS(pcat,st,t)
 
@@ -1027,8 +1026,6 @@ eq_tech_requirement(pcat,st,t)
 * must equal the required amount
     required_tech(pcat,st,t)
 
-* plus prescribed capacity
-    + sum{r$r_st(r,st),noncumulative_prescriptions(pcat,r,t)}
 
 ;
 * ---------------------------------------------------------------------------
@@ -1100,7 +1097,7 @@ eq_rsc_INVlim(r,i,rscbin,t)$[tmodel(t)
 *must exceed the cumulative invested capacity in that region/class/bin...
     sum{(ii,v,tt)$[valinv(ii,v,r,tt)$(yeart(tt) <= yeart(t))$rsc_agg(i,ii)],
          INV_RSC(ii,v,r,rscbin,tt) * resourcescaler(ii) }
-         
+
 *plus exogenous (pre-start-year) capacity, using its level in the first year (tfirst)
     + sum{(ii,v,tt)$[tfirst(tt)$rsc_agg(i,ii)$exog_rsc(i)],
          capacity_exog_rsc(ii,v,r,rscbin,tt) }

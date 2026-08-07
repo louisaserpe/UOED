@@ -1008,15 +1008,19 @@ def main(reeds_path, inputs_case):
     ##############################
     #  -- State Required Builds --    #
     ##############################
-    # If no state required builds are specified, then return an empty dataframe
-    if int(sw.GSw_BuildRequirements) == 0:
-        req_builds = pd.DataFrame(columns=['*i', 'st', 't', 'value'])
-    # If enforcing state required builds then the prescribed builds and existing capacity need to added to the list of required capacity
-    else :
-        req_builds = pd.read_csv(os.path.join(inputs_case,'required_investments.csv'))
+    # # If no state required builds are specified, then return an empty dataframe
+    # if int(sw.GSw_BuildRequirements) == 0:
+    #     req_builds = pd.DataFrame(columns=['i', 'st', 't', 'value'])
+    # # If enforcing state required builds then the prescribed builds and existing capacity need to added to the list of required capacity
+    # else :
+    #     req_builds = pd.read_csv(os.path.join(inputs_case,'required_investments.csv'))
            
-        # Filter to only include modeled years
-        req_builds = req_builds[req_builds['t']<= max(years)]
+    #     # Filter to only include modeled years
+    #     req_builds = req_builds[req_builds['t']<= max(years)]
+    req_builds = pd.read_csv(os.path.join(inputs_case,'required_investments.csv'))
+    
+    # Filter to only include modeled years
+    req_builds = req_builds[req_builds['t']<= max(years)]
 
     #%%----------------------------------------------------------------------------
     ##############################
@@ -1050,7 +1054,7 @@ def main(reeds_path, inputs_case):
                 'hydcapadj_ccszn' : hydcapadj_ccszn[['i','ccseason','r','value']],
                 'can_imports_capacity' : can_imports_capacity.reset_index(),
                 'geoexist' : geoexist,
-                'req_builds' : req_builds[['*i','st','t','value']],
+                'req_builds' : req_builds[['i','st','t','value']],
                 'h2_ba_share': h2_ba_share_out,
                 'exog_cap_upv':cap_exog['upv'],
                 'exog_cap_wind-ons':cap_exog['wind-ons'],

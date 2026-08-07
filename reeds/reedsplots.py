@@ -6683,6 +6683,7 @@ def map_output_byyear(
     vscale=1,
     vmin=None,
     vmax=None,
+    filter_st = False,
     **kwargs,
 ):
     ### Parse inputs
@@ -6702,6 +6703,17 @@ def map_output_byyear(
         title: reeds.io.read_output(case, param).astype({'t':int})
         for title, case in zip(titles, plotcases)
     }
+    if filter_st:
+        dictin_regions = dictin[next(iter(dictin.keys()))]['r'].unique()
+        # Determine number of unique states in dictin_regions
+        states = []
+        for reg in dictin_regions:
+            st = dfmap['r'].loc[reg]['st']
+            states.append(st)
+        states = list(set(states))
+
+        dfmap['r'] = dfmap['r'][dfmap['r']['st'].isin(states)]
+
     ## Filter to plot years and reshape to [r × t]
     dictplot = {
         k: v.loc[v.t.isin(years)].pivot(index='r', columns='t', values='Value') * vscale
@@ -6726,8 +6738,10 @@ def map_output_byyear(
     for title, case in zip(titles, plotcases):
         for year in years:
             _ax = (ax if len(coords) == 1 else ax[coords[title, year]])
+
             ## Background
-            dfmap['country'].plot(ax=_ax, facecolor='none', edgecolor='k', lw=0.5, zorder=1e9)
+            if filter_st == False:
+                dfmap['country'].plot(ax=_ax, facecolor='none', edgecolor='k', lw=0.5, zorder=1e9)
             dfmap['r'].plot(ax=_ax, facecolor='none', edgecolor='C7', lw=0.2, zorder=1e8)
             ## Data
             dfplot = dfmap['r'].copy()
