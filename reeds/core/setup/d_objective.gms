@@ -44,12 +44,12 @@ eq_ObjFn_inv(t)$tmodel(t)..
                       }
 
 * slack for req builds equations
-*                  + sum{(pcat,st)$sum{(ppcat,tt), required_investment(ppcat,st,tt) }
+*                  + sum{(i,st)$sum{(i,tt), required_investment(i,st,tt) }
 *                          $[(yeart(t) >= model_builds_start_yr)
-*                              $Sw_BuildRequirements], REQ_SLACK_RHS(pcat,st,t) + REQ_SLACK_LHS(pcat,st,t) } *1E9
+*                              $Sw_BuildRequirements], REQ_SLACK_RHS(i,st,t) + REQ_SLACK_LHS(i,st,t) } *1E9
 * slack for req builds equations
-*                       + sum{(pcat,st)$[(yeart(t) >= model_builds_start_yr)$Sw_BuildRequirements],
-*                               REQ_SLACK_RHS(pcat,st,t) + REQ_SLACK_LHS(pcat,st,t) } * 1E9
+*                       + sum{(i,st)$[(yeart(t) >= model_builds_start_yr)$Sw_BuildRequirements],
+*                               REQ_SLACK_RHS(i,st,t) + REQ_SLACK_LHS(i,st,t) } * 1E9
 
 * --- penalty for exceeding interconnection queue limit  ---
                   + sum{(tg,r), cap_penalty(tg) * CAP_ABOVE_LIM(tg,r,t) }    

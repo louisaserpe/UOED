@@ -1726,8 +1726,6 @@ set valcap(i,v,r,t)            "i, v, r, and t combinations that are allowed for
     m_rscfeas(r,i,rscbin)      "--qualifier-- feasibility conditional for investing in RSC techs"
 ;
 
-  set pcat(*)                    "categories used in state build requirement inputs",
-    prescriptivelink(pcat,i)   "mapping from build-requirement category to eligible technologies" ;
 
 
 * define qualifier for renewable supply curve investment variables
@@ -1822,13 +1820,9 @@ prescription_check(i,newv,r,t)$[prescribed_build(i,newv,r,t)
 *Only enable for bin1 if there is no resource in any bins to keep parameter size down.
 m_rscfeas(r,i,"bin1")$[sum{(newv,t)$[tmodel_new(t)], prescribed_build(i,newv,r,t) }$rsc_i(i)$(not bannew(i))$(sum{rscbin, rsc_dat(i,r,"cap",rscbin) }=0)] = yes ;
 
-*Build requirement category sets - declared before use in parameter domains
-set pcat "Product category for build requirements" ;
-set prescriptivelink(pcat,i) "Mapping between requirement categories and technologies" ;
-set noncumulative_prescriptions(pcat,r,t) "Flag for noncumulative prescriptions" ;
 
 $onempty
-parameter required_investment(pcat,st,allt) "--MW-- user-specified required investments by state"
+parameter required_investment(i,st,allt) "--MW-- user-specified required investments by state"
 /
 $offlisting
 $ondelim
@@ -1840,19 +1834,19 @@ $offempty
 
 $ifthen.req_inv %GSw_ReqInvest% == 1
 * need to fill in for unmodeled, gap years via tprev but
-required_investment(pcat,st,t)$tmodel_new(t)
+required_investment(i,st,t)$tmodel_new(t)
           = sum{tt$[(yeart(tt)<=yeart(t)
 * this condition populates values of tt which exist between the
 * previous modeled year and the current year
             $(yeart(tt)>sum{ttt$tprev(t,ttt), yeart(ttt) }))
             ],
-            required_investment(pcat,st,tt)
+            required_investment(i,st,tt)
           } ;
 $endif.req_inv
 
 
 $onempty
-parameter required_tech(pcat,st,allt) "--MW-- user-specified required tech by state"
+parameter required_tech(i,st,allt) "--MW-- user-specified required tech by state"
 /
 $offlisting
 $ondelim
@@ -1863,28 +1857,14 @@ $onlisting
 $offempty
 
 * need to fill in for unmodeled, gap years via tprev but
-required_tech(pcat,st,t)$tmodel_new(t)
+required_tech(i,st,t)$tmodel_new(t)
                   = sum{tt$[(yeart(tt)<=yeart(t)
 * this condition populates values of tt which exist between the
 * previous modeled year and the current year
                       $(yeart(tt)>sum{ttt$tprev(t,ttt), yeart(ttt) }))
                       ],
-                      required_tech(pcat,st,tt)
+                      required_tech(i,st,tt)
                     } ;
-
-* Build requirement categories from provided inputs.
-* pcat members will be inferred from CSV data for required_investment and required_tech parameters
-* pcat(pcat)$[sum{(st,allt), required_investment(pcat,st,allt) + required_tech(pcat,st,allt) }] = yes ;
-
-* Default one-to-one mapping if requirement category matches an i label.
-prescriptivelink(pcat,i)$sameas(pcat,i) = yes ;
-
-* Common aggregate categories used in policy input files.
-prescriptivelink("upv",i)$upv(i) = yes ;
-prescriptivelink("wind-ons",i)$[wind(i)$(not ofswind(i))] = yes ;
-prescriptivelink("wind-ofs",i)$ofswind(i) = yes ;
-prescriptivelink("storage",i)$battery(i) = yes ;
-prescriptivelink("gas-ct",i)$gas_ct(i) = yes ;
 
 
 *==========================================================
