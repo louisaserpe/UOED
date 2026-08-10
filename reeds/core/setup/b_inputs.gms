@@ -1821,8 +1821,16 @@ prescription_check(i,newv,r,t)$[prescribed_build(i,newv,r,t)
 m_rscfeas(r,i,"bin1")$[sum{(newv,t)$[tmodel_new(t)], prescribed_build(i,newv,r,t) }$rsc_i(i)$(not bannew(i))$(sum{rscbin, rsc_dat(i,r,"cap",rscbin) }=0)] = yes ;
 
 
+$ifthen.req_inv %GSw_BuildRequirements% == 1
 $onempty
-parameter required_investment(i,st,allt) "--MW-- user-specified required investments by state"
+* required_investment is now indexed over i_subtech (tech group names such as UPV, ONSWIND)
+* rather than individual tech names (upv_1, wind-ons_1, ...).
+* The eq_build_requirement constraint sums investments across all techs ii where
+* i_subsets(ii,i_subtech) is non-zero, so a single row "upv,CO,2030,1000" constrains
+* the combined UPV investment in Colorado to 1000 MW.
+* NOTE: avoid requesting overlapping i_subtech groups for the same (st,t) - e.g. UPV and PV
+* both cover UPV techs and would independently constrain the same investments.
+parameter required_investment(i_subtech,st,allt) "--MW-- user-specified required investments by state"
 /
 $offlisting
 $ondelim
@@ -1831,22 +1839,32 @@ $offdelim
 $onlisting
 / ;
 $offempty
+$else.req_inv
+parameter required_investment(i_subtech,st,allt) "--MW-- user-specified required investments by state" ;
+required_investment(i_subtech,st,allt) = 0 ;
+$endif.req_inv
 
-$ifthen.req_inv %GSw_ReqInvest% == 1
+$ifthen.req_inv %GSw_BuildRequirements% == 1
 * need to fill in for unmodeled, gap years via tprev but
-required_investment(i,st,t)$tmodel_new(t)
+required_investment(i_subtech,st,t)$tmodel_new(t)
           = sum{tt$[(yeart(tt)<=yeart(t)
 * this condition populates values of tt which exist between the
 * previous modeled year and the current year
             $(yeart(tt)>sum{ttt$tprev(t,ttt), yeart(ttt) }))
             ],
-            required_investment(i,st,tt)
+            required_investment(i_subtech,st,tt)
           } ;
 $endif.req_inv
 
 
+$ifthen.req_tech %GSw_TechRequirement% == 1
 $onempty
-parameter required_tech(i,st,allt) "--MW-- user-specified required tech by state"
+* required_tech is indexed over i_subtech (tech group names such as UPV, ONSWIND)
+* rather than individual tech names (upv_1, wind-ons_1, ...).
+* The eq_tech_requirement constraint sums investments across all techs ii where
+* i_subsets(ii,i_subtech) is non-zero.
+* NOTE: avoid requesting overlapping i_subtech groups for the same (st,t).
+parameter required_tech(i_subtech,st,allt) "--MW-- user-specified required tech by state"
 /
 $offlisting
 $ondelim
@@ -1855,16 +1873,22 @@ $offdelim
 $onlisting
 / ;
 $offempty
+$else.req_tech
+parameter required_tech(i_subtech,st,allt) "--MW-- user-specified required tech by state" ;
+required_tech(i_subtech,st,allt) = 0 ;
+$endif.req_tech
 
 * need to fill in for unmodeled, gap years via tprev but
-required_tech(i,st,t)$tmodel_new(t)
+$ifthen.req_tech_fill %GSw_TechRequirement% == 1
+required_tech(i_subtech,st,t)$tmodel_new(t)
                   = sum{tt$[(yeart(tt)<=yeart(t)
 * this condition populates values of tt which exist between the
 * previous modeled year and the current year
                       $(yeart(tt)>sum{ttt$tprev(t,ttt), yeart(ttt) }))
                       ],
-                      required_tech(i,st,tt)
+                      required_tech(i_subtech,st,tt)
                     } ;
+$endif.req_tech_fill
 
 
 *==========================================================
@@ -2485,6 +2509,7 @@ $onlisting
 ;
 $offempty
 
+$ifthen.opgw %GSw_OPGW% == 1
 $onempty
 parameter annual_generation_target(allt,st) "--MWh-- annual target for in-state generation"
 /
@@ -2496,6 +2521,10 @@ $onlisting
 /
 ;
 $offempty
+$else.opgw
+parameter annual_generation_target(allt,st) "--MWh-- annual target for in-state generation" ;
+annual_generation_target(allt,st) = 0 ;
+$endif.opgw
 
 
 RecPerc(RPSCat,st,t) = sum{allt$att(allt,t), rps_fraction(allt,st,RPSCat) } ;

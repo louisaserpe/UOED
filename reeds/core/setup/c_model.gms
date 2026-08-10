@@ -40,8 +40,8 @@ positive variables
   INV_RSC(i,v,r,rscbin,t)                  "--MW-- investment in technologies that use a resource supply curve"
   UPGRADES(i,v,r,t)                        "--MW-- investments in upgraded capacity from ii to i"
   UPGRADES_RETIRE(i,v,r,t)                 "--MW-- upgrades that have been retired - used as a free slack variable in eq_cap_upgrade"
-  REQ_SLACK_LHS(i,st,t)                 "--MW-- left-hand side of the slack variable for required builds"
-  REQ_SLACK_RHS(i,st,t)                 "--MW-- right-hand side of the slack variable for required builds"
+  REQ_SLACK_LHS(i_subtech,st,t)         "--MW-- left-hand side of the slack variable for required builds"
+  REQ_SLACK_RHS(i_subtech,st,t)         "--MW-- right-hand side of the slack variable for required builds"
 
 * The units for all of the operational variables are average MW or MWh/time-slice hours
 * generation and storage variables
@@ -172,8 +172,8 @@ EQUATION
  eq_refurblim(i,r,t)                      "--MW-- total refurbishments cannot exceed the amount of capacity that has reached the end of its life"
 
 * force exogenous build requirements (typically for IRP matching)
- eq_build_requirement(i,st,t)          "--MW-- investments in a state must equal the user-specified investments"
- eq_tech_requirement(i,st,t)           "--MW-- investments in a particular technolgy in state must equal the user-specified investments"
+ eq_build_requirement(i_subtech,st,t)  "--MW-- aggregate investments in a state for a tech group must equal the user-specified investments"
+ eq_tech_requirement(i_subtech,st,t)   "--MW-- aggregate investments in a particular tech group in state must equal the user-specified investments"
 
 * renewable supply curves
  eq_rsc_inv_account(i,v,r,t)              "--MW-- INV for rsc techs is the sum over all bins of INV_RSC"
@@ -986,45 +986,46 @@ eq_forceprescription_energy(i,newv,r,t)
 ;
 
 * ---------------------------------------------------------------------------
-* require specific amounts of capacity to be built in a state
-eq_build_requirement(i,st,t)
+* require specific amounts of aggregate capacity to be built in a state for a tech group
+* required_investment is indexed over i_subtech (e.g. UPV, ONSWIND) so a single row
+* constrains the total investment across all individual techs ii in that group.
+eq_build_requirement(i_subtech,st,t)
     $[tmodel(t)
-    $sum{(ii,tt), required_investment(ii,st,tt) }
+    $sum{tt, required_investment(i_subtech,st,tt) }
     $(yeart(t) >= model_builds_start_yr)
     $Sw_BuildRequirements
     $(not Sw_PCM)]..
 
-* Sum of investments in the state
-    sum{(i,v,r)$[r_st(r,st)$valinv(i,v,r,t)], INV(i,v,r,t) }
+* Sum of investments across all techs in the group, in the state
+    sum{(ii,v,r)$[r_st(r,st)$valinv(ii,v,r,t)$i_subsets(ii,i_subtech)], INV(ii,v,r,t) }
 * add slack
-     + REQ_SLACK_LHS(i,st,t)
+     + REQ_SLACK_LHS(i_subtech,st,t)
 
     =e=
 
-* must equal the required amount
-    required_investment(i,st,t)
-
+* must equal the required amount for this tech group
+    required_investment(i_subtech,st,t)
 
 * add slack
-    + REQ_SLACK_RHS(i,st,t)
+    + REQ_SLACK_RHS(i_subtech,st,t)
 
 ;
 
-* require investment in a specific technology in a state
-eq_tech_requirement(i,st,t)
+* require aggregate investment in a tech group in a state
+eq_tech_requirement(i_subtech,st,t)
     $[tmodel(t)
-    $sum{tt, required_tech(i,st,tt) }
+    $sum{tt, required_tech(i_subtech,st,tt) }
     $(yeart(t) >= model_builds_start_yr)
     $Sw_TechRequirement
     $(not Sw_PCM)]..
 
-* Sum of investments in the state
-    sum{(i,v,r)$[r_st(r,st)$valinv(i,v,r,t)], INV(i,v,r,t) }
+* Sum of investments across all techs in the group, in the state
+    sum{(ii,v,r)$[r_st(r,st)$valinv(ii,v,r,t)$i_subsets(ii,i_subtech)], INV(ii,v,r,t) }
 
     =e=
 
-* must equal the required amount
-    required_tech(i,st,t)
+* must equal the required amount for this tech group
+    required_tech(i_subtech,st,t)
 
 
 ;
