@@ -511,6 +511,12 @@ def get_hurdle_rates(case, hurdle_level=1):
         if int(sw.GSw_TransHurdleRate)
         else pd.Series(name='USDperMWh').rename_axis('t')
     )
+    # Filter to model years
+    solveyears = pd.read_csv(
+            Path(case, 'inputs_case', 'modeledyears.csv')
+        ).columns.astype(int).tolist()
+    cost_hurdle_rate = cost_hurdle_rate.loc[cost_hurdle_rate.index.isin(solveyears)]
+
     return cost_hurdle_rate.reset_index()
 
 
