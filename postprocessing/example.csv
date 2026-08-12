@@ -12,5 +12,5 @@ casepath,casename,color
 # /projects/reedsweto/pbrown/github/ReEDS/runs/v20241028_mainK0_USA_decarb,main_Z35,plt.cm.tab20(2)
 # /projects/reedsweto/pbrown/github4/ReEDS/runs/v20241028_porK0_USA_decarb,por_Z35,plt.cm.tab20(3)
 ### Add your cases below (don't commit them) or create a new csv file with the same format
-/data/shared/projects/lserpe/model3/ReEDS/runs/test_Pacific,pacific,
-/data/shared/projects/lserpe/model3/ReEDS/runs/test_Pacific,pacific copy,
+/data/shared/projects/lserpe/uoed_fork2/UOED/runs/ce_test2_tx_BAU,Utah mixed,
+/data/shared/projects/lserpe/uoed_fork2/UOED/runs/ce_test2_tx_BAU,Utah mixed copy,
