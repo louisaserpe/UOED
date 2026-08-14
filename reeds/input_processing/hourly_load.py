@@ -596,6 +596,67 @@ def reaggregate_to_model_regions(
 
     return regional_load_hourly
 
+def apply_county_scale_factors(regional_load_hourly, county_scale_factors,solveyears, GSw_LoadAllocationMethod):
+    '''
+    Apply user-defined county scale factors to the regional load profiles.
+
+    Args:
+        regional_load_hourly: Hourly regional load profiles.
+        county_scale_factors: County-level load scale factors.
+        solveyears: Optional list of model years to filter load
+        GSw_LoadAllocationMethod: Method by which to allocate state
+            load to model regions.
+
+    Returns:
+        pd.DataFrame
+    '''
+
+    # Read annual state multipliers representing projected load growth
+    # from a baseline year
+    load_multiplier = pd.read_csv(
+        os.path.join(inputs_case, 'load_multiplier.csv')
+    )
+    # Subset load multipliers for solve years only 
+    if solveyears is not None:
+        load_multiplier = (
+            load_multiplier[load_multiplier['year'].isin(solveyears)]
+            [['year', 'r', 'multiplier']]
+        )
+    disagg_data = reeds.io.get_disagg_data(
+        os.path.dirname(inputs_case),
+        disagg_variable=GSw_LoadAllocationMethod
+    )
+    regional_load_hourly_adj = regional_load_hourly.copy()
+    # Revert the regional load profiles for the counties included in the county scale factors
+    # back to pre-load multiplier values
+    counties_to_revert = county_scale_factors['county'].values.tolist()    
+    for county in counties_to_revert:
+        cagr = county_scale_factors[county_scale_factors['county'] == county]['CAGR'].values[0]
+        # Get load multiplier for the state the county belongs to
+        county2state = disagg_data.loc[disagg_data['FIPS'] == county, 'state'].values[0]
+        load_mults_all_years = load_multiplier[load_multiplier['r'] == county2state]        
+        # Only revert load multiplier for years greater than or equal to the minimum county scale year
+        min_county_scale_year = county_scale_factors[county_scale_factors['county'] == county]['year'].min()
+        for year in load_mults_all_years['year'].values:
+            if year > min_county_scale_year:
+                regional_load_hourly_adj.loc[regional_load_hourly_adj.index.get_level_values('year') == year, county] = ((
+                    regional_load_hourly_adj.loc[regional_load_hourly_adj.index.get_level_values('year') == year, county]
+                    / load_mults_all_years.loc[
+                        load_mults_all_years['year'] == year,
+                        'multiplier'
+                    ].values[0]) * ((1+cagr)**(year - min_county_scale_year))
+                )
+        
+# year = 2041
+# adjusted = regional_load_hourly
+# adjusted_wash = adjusted['p49053']
+# adjusted_wash_year = adjusted_wash[adjusted_wash.index.get_level_values('year') == year]
+
+# original = reg_load_preadj
+# original_wash = original['p49053']
+# original_wash_year = original_wash[original_wash.index.get_level_values('year') == year]
+
+    return regional_load_hourly_adj
 
 #%% ===========================================================================
 ### --- MAIN FUNCTION ---
@@ -680,6 +741,17 @@ def main(reeds_path, inputs_case):
         sw.GSw_LoadAllocationMethod
     )
 
+    # Apply user-defined county scale factors to the regional load profiles
+    # County-level load scale factors are only supported for the
+    # 'historic' load profile (see GSw_LoadCountyScalar in cases.csv)
+    if sw.GSw_LoadProfiles == 'historic' and sw.GSw_LoadCountyScalar != 'none' :
+
+        county_scale_factors = pd.read_csv(os.path.join(inputs_case, 'county_load_scalar.csv'))
+        regional_load_hourly = apply_county_scale_factors(
+            regional_load_hourly,
+            county_scale_factors,
+            solveyears, sw.GSw_LoadAllocationMethod )  
+                                             
     #%%%#########################################
     #    -- Performing Load Modifications --    #
     #############################################
