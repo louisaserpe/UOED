@@ -1,0 +1,8 @@
+,Default Value,ctrl_coal_close,test_0.5Gnuc,test_1Gnuc,test_1.5Gnuc,test_2Gnuc,test_2.5Gnuc
+ignore,1,0,0,0,0,0,0
+endyear,,2050,2050,2050,2050,2050,2050
+GSw_ZoneSet,,UTcounty,UTcounty,UTcounty,UTcounty,UTcounty,UTcounty
+GSw_GasCurve,,2,2,2,2,2,2
+unitdata,EIA-NEMS,EIA-NEMS_CoalClose,EIA-NEMS_0.5GNucUT,EIA-NEMS_1.0GNucUT,EIA-NEMS_1.5GNucUT,EIA-NEMS_2.0GNucUT,EIA-NEMS_2.5GNucUT
+GSw_Clean_Air_Act,0,0,0,0,0,0,0
+GSw_Upgrades,0,0,0,0,0,0,0
