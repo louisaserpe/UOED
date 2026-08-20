@@ -98,6 +98,13 @@ def calculate_regional_generation(
         id_vars=index_cols,
         var_name='EIA_PlantID'
     )
+    # Normalize plant IDs so float-like strings (e.g., '34.0') map to integer keys.
+    _plant_generation['EIA_PlantID'] = pd.to_numeric(
+        _plant_generation['EIA_PlantID'],
+        errors='coerce'
+    ).astype('Int64')
+    _plant_generation = _plant_generation.dropna(subset=['EIA_PlantID'])
+    _plant_generation['EIA_PlantID'] = _plant_generation['EIA_PlantID'].astype(int)
     _plant_generation = (
         _plant_generation.merge(
             hydro_plants,
@@ -319,12 +326,14 @@ def get_hydro_plants(inputs_case: str) -> pd.DataFrame:
         os.path.join(inputs_case, 'unitdata.csv'),
         usecols=['T_PID', 'tech', 'r']
     )
+    gendb['T_PID'] = pd.to_numeric(gendb['T_PID'], errors='coerce').astype('Int64')
     hydro_plants = (
-        gendb.loc[gendb.tech.str.startswith('hyd')]
+        gendb.loc[gendb.tech.str.startswith('hyd') & gendb['T_PID'].notna()]
+        .assign(T_PID=lambda df: df['T_PID'].astype(int))
         .drop_duplicates('T_PID')
         .set_index('T_PID')
     )
-    hydro_plants.index = hydro_plants.index.astype(str)
+    hydro_plants.index = hydro_plants.index.astype(int)
 
     return hydro_plants
 
