@@ -1,5 +1,5 @@
-,Default Value,tx_BAU_OEDBr,tx_OGG_OEDBr,tx_BYOG_OEDBr,tx_LG_OEDBr
-ignore,1,0,0,0,0
+,Default Value,tx_BAU_OEDBr,tx_LG_OEDBr,tx_OGG_OEDBr,tx_BYOG_OEDBr
+ignore,1,1,1,0,1
 endyear,,2040,2040,2040,2040
 GSw_Region,interconnect/western,,,,
 GSw_ZoneSet,UTcounty,,,,
@@ -8,20 +8,20 @@ GSw_OPGW,0,0,0,0,0
 GSw_OPGW_load_mult,1,,,,
 GSw_BuildRequirements,0,0,0,0,0
 GSw_BuildRequirementsFile,none,none,none,none,none
-GSw_LargeLoadAdd,none,,tx_OGG2,tx_BYOG2,
+GSw_LargeLoadAdd,none,,,tx_OGG2,tx_BYOG2
 GSw_Clean_Air_Act,1,0,0,0,0
 GSw_Retire,5,0,0,0,0
 GSw_Upgrades,1,0,0,0,0
-GSw_TechRequirement,,,1,,
-GSw_TechRequirementFile,,,UT_ds5_advtech,,
+GSw_TechRequirement,,,,1,
+GSw_TechRequirementFile,,,,UT_ds5_advtech,
 GSw_LoadProfiles,historic,,,,
-demandscen,AEO_2026_reference,UT5i,UT7c_highhr,UT5i,UT5i
-unitdata,,EIA-NEMS_apr26_update,EIA-NEMS_apr26_update,EIA-NEMS_apr26_update_advtech3,EIA-NEMS_apr26_update_advtech2
+demandscen,AEO_2026_reference,UT5i,UT5i,UT7c_highhr,UT5i
+unitdata,,EIA-NEMS_aug26_update,EIA-NEMS_aug26_update_advtech2,EIA-NEMS_aug26_update,EIA-NEMS_aug26_update_advtech3
 GSw_NuclearDemo,0,1,1,1,1
 yearset,2010_2015_2020..2050..2,,,,
-GSw_LoadSiteCF,0,,,1,
-GSw_LoadSiteRA,0,,,1,
-GSw_LoadSiteTrajectory,,,,st_tx_endo4,
+GSw_LoadSiteCF,0,,,,1
+GSw_LoadSiteRA,0,,,,1
+GSw_LoadSiteTrajectory,,,,,st_tx_endo4
 plantchar_gas,gas_ATB_2024_moderate,,,,
 plantchar_geo,geo_ATB_2024_moderate,,geo_ATB_2024_advanced,geo_ATB_2024_advanced,geo_ATB_2024_advanced
 GSw_Geothermal,1,,2,2,2
@@ -31,3 +31,4 @@ plantchar_nuclear,nuclear_ATB_2024_moderate,,nuclear_ATB_2024_advanced,nuclear_A
 GSw_TransHurdleLevel1,transgrp,hurdlereg,hurdlereg,hurdlereg,hurdlereg
 GSw_TransHurdleLevel2,hurdlereg,st,st,st,st
 GSw_TransHurdleRate,0,1,1,1,1
+GSw_LoadCountyScalar,none,Washington_07,Washington_07,Washington_07,Washington_07
